@@ -1,5 +1,6 @@
 package com.happysat.microservices.order;
 
+import com.happysat.microservices.order.stub.InventoryStubs;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,10 +12,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
+@AutoConfigureWireMock(port = 0)
 class OrderServiceApplicationTests {
 
 	@Container
@@ -34,11 +36,13 @@ class OrderServiceApplicationTests {
 	void shouldSubmitOrder() {
 		String submitOrderJson = """
             {
-                "skuCode": "iphone 15",
+                "skuCode": "iphone_15",
                 "price": 800000,
                 "quantity": 1
             }
         """;
+
+		InventoryStubs.stubInventoryCall("iphone_15", 1);
 
 		var responseBodyString = RestAssured.given()
 				.contentType("application/json")
